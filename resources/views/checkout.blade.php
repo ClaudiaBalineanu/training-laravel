@@ -1,7 +1,7 @@
 @extends ('cart')
 
 @section('checkout')
-    <form method="post" action="/cart">
+    <form method="post" action="{{ route('cart') }}">
         @csrf
         <?php if (session('message')) : ?>
         <div>
