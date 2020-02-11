@@ -36,5 +36,5 @@
          @yield('checkout')
 
     <br/>
-    <a href="/index">{{ __('Go To Products') }}</a>
+    <a href="{{ route('index') }}">{{ __('Go To Products') }}</a>
 @endsection
