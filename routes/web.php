@@ -10,38 +10,41 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-/*
-Route::get('/test', function () {
-    return view('test');
-});
-*/
 
+// index and add to cart
 Route::get('/index', 'ProductsController@index')->name('index');
 Route::get('/add-to-cart/{product}', 'ProductsController@addToCart')->name('addToCart.product');
 
-Route::get('/cart', 'ProductsController@cart')->name('cart');
-Route::get('/remove-from-cart/{product}', 'ProductsController@removeFromCart')->name('removeFromCart.product');
+// cart and remove from cart
+Route::get('/cart', 'CartController@cart')->name('cart');
+Route::get('/remove-from-cart/{product}', 'CartController@removeFromCart')->name('removeFromCart.product');
 
-Route::post('/cart', 'ProductsController@checkoutCart')->name('checkout');
+// checkout (cart page) send email
+Route::post('/cart', 'CartController@checkoutCart')->name('checkout');
 
+// for login, authenticate
+Auth::routes();
 
+// show all products
+Route::get('/products', 'ProductsController@show')->name('products')->middleware('auth');
 
-//Route::post('/login', 'LoginController@store');
-//Route::get('/login', 'LoginController@create')->middleware('auth');
-
-
-Route::get('/products', function () {
-    //$product = App\Product::all();
-    return view('products', [
-        'products' => App\Product::all() // take(3)->latest()->get()
-    ]);
-})->name('products');
-
+// create and persist a product
 Route::post('/products', 'ProductsController@store')->name('store');
-Route::get('/products/create', 'ProductsController@create')->name('create');
+Route::get('/products/create', 'ProductsController@create')->name('create')->middleware('auth');
 
+// edit and persist a product
 Route::put('/products/{product}', 'ProductsController@update')->name('update');
-Route::get('/products/{product}/edit', 'ProductsController@edit')->name('edit');
+Route::get('/products/{product}/edit', 'ProductsController@edit')->name('edit')->middleware('auth');
 
-
+// delete a product
 Route::get('/products/delete/{product}', 'ProductsController@delete')->name('delete');
+
+
+
+
+
+
+
+
+
+
