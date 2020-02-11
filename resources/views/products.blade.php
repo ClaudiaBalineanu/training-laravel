@@ -1,7 +1,9 @@
 @extends ('layout')
 
 @section ('content')
+
     <h3>Products</h3>
+    <h5>Welcome, {{ Auth::user()->name }}</h5>
 
     <?php /** @var \Illuminate\Database\Eloquent\Collection $products */ ?>
 
@@ -32,17 +34,17 @@
     <?php else : ?>
         {{ __('No data') }}
     <?php endif ?>
-    <a href="/products/create">{{ __('Add') }}</a>
+    <a href="{{ route('create') }}">{{ __('Add') }}</a>
 
+    <br>
+    <!--  snippet code taken from app.blade.php for logout, doesn't work without form and onclick  -->
+    <a href="{{ route('logout') }}"
+       onclick="event.preventDefault();
+       document.getElementById('logout-form').submit();">
+            {{ __('Logout') }}
+    </a>
 
-
-    <!--
-
-    <p>{/{ url('/') }}</p>
-    <p></p>
-
-    request()->root() sau url
-    nope -- url()->previous()
-    <p>{/{ $name }}</p>
-    -->
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+        @csrf
+    </form>
 @endsection

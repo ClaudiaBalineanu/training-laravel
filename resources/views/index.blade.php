@@ -28,6 +28,8 @@
     <?php else : ?>
         {{ __('No data') }}
     <?php endif ?>
-
-    <a href="/cart">{{ __('Go To Cart') }}</a>
+    <br>
+    <a href="{{ route('cart') }}">{{ __('Go To Cart') }}</a>
+    <br>
+    <a href="{{ route('login') }}">{{ __('Login') }}</a>
 @endsection

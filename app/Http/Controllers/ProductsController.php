@@ -3,11 +3,8 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\Checkout;
 use Illuminate\Support\Facades\File;
 
 class ProductsController extends Controller
@@ -41,58 +38,12 @@ class ProductsController extends Controller
         return redirect()->route('index');
     }
 
-    public function cart(Request $request)
+    public function show()
     {
-        // show products in cart and the form for checkout
-        $cart = $request->session()->has('cart.products') ? $request->session()->get('cart.products') : [];
-
-        $products = Product::whereIn('id', $cart)->get();
-
-        return view('checkout', compact('products'));
-    }
-
-    public function removeFromCart(Request $request, Product $product)
-    {
-        $cart = $request->session()->get('cart.products');
-
-        if ($product->id) {
-
-            $keySession = array_search($product->id, $cart);
-
-            if (isset($cart[$keySession])) {
-
-                //unset the id for product from session
-                unset($cart[$keySession]);
-                $request->session()->put('cart.products', $cart);
-            }
-        }
-        return redirect()->route('checkout');
-    }
-
-    public function checkoutCart(Request $request)
-    {
-        // persist data from form, send email
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
+        // show all products from database
+        return view('products', [
+            'products' => Product::all()
         ]);
-
-        $cart = $request->session()->has('cart.products') ? $request->session()->get('cart.products') : [];
-        $products = Product::whereIn('id', $cart)->get();
-
-        if (! empty($cart)) {
-
-            Mail::to(request('email'))->send(new Checkout($products));
-
-            // clean session
-            $request->session()->forget('cart.products');
-
-            return redirect()->route('cart')->with('message', 'Email sent');
-
-        } else {
-
-            return redirect()->route('checkout')->with('message', 'Cart empty');
-        }
     }
 
     public function create()
@@ -101,10 +52,10 @@ class ProductsController extends Controller
         return view('create');
     }
 
-    public function store()
+    public function store(Request $request)
     {
         // persist data of the new product in database
-        Product::create($this->validateProduct());
+        Product::create($this->validateProduct($request));
 
         return redirect('/products/create');
     }
@@ -115,37 +66,38 @@ class ProductsController extends Controller
         return view('edit', compact('product'));
     }
 
-    public function update(Product $product)
+    public function update(Request $request, Product $product)
     {
         // persist the edited product
 
+        // save the name af the old image
         $img = $product->image;
 
-        $product->update($this->validateProduct());
+        $product->update($this->validateProduct($request));
 
-        if(isset($img) && File::exists(public_path('images') . '\\' . $img)) {
+        // delete the old image from sever
+        if (isset($img) && File::exists(public_path('images') . '\\' . $img)) {
             File::delete(public_path('images') . '\\' . $img);
         }
 
         return redirect('/products');
-        //return redirect('/products/' . $product->id . '/edit');
     }
 
-    public function validateProduct()
+    public function validateProduct(Request $request)
     {
         // validate the data inserted by the user in the view form
-        $validateAttributes = request()->validate([
-            'title' => ['required', 'min:3'],
+        $validateAttributes = $request->validate([
+            'title' => 'required|min:3|regex:/^[a-zA-Z ]*$/',
             'description' => 'required',
-            'price' => 'required',
+            'price' => 'required|regex:/^[0-9]*\.[0-9]+$/',
             'image' => 'required|image'
         ]);
 
         // make the name of the image unique
-        $imageName = uniqid().'.'.request()->image->getClientOriginalExtension();
+        $imageName = uniqid() . '.' . $request->image->getClientOriginalExtension();
 
         // save the image in the folder
-        request()->image->move(public_path('images'), $imageName);
+        $request->image->move(public_path('images'), $imageName);
 
         $validateAttributes['image'] = $imageName;
 

@@ -34,7 +34,7 @@
         <span class="alert alert-danger">{{ $message }}</span>
         @enderror
         <br/><br/>
-        <a href="/products">{{ __('Products') }}</a>
+        <a href="{{ route('products') }}">{{ __('Products') }}</a>
         <input type="submit" name="submit" value="{{ __('Save') }}">
     </form>
 @endsection
