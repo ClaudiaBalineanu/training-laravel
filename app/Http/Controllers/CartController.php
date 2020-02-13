@@ -1,60 +1,81 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use App\Mail\Checkout;
+use App\Order;
 use App\Product;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class CartController extends Controller
 {
-    public function cart(Request $request)
+    /**
+     * Show products in cart and the form for checkout
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function cart()
     {
-        // show products in cart and the form for checkout
-        $cart = $request->session()->has('cart.products') ? $request->session()->get('cart.products') : [];
+        $cart = request()->session()->get('cart.products', []);
 
-        $products = Product::whereIn('id', $cart)->get();
+        $products = Product::query()->whereIn('id', $cart)->get();
 
         return view('checkout', compact('products'));
     }
 
-    public function removeFromCart(Request $request, Product $product)
+    /**
+     * Remove an item (product) from cart
+     *
+     * @param Product $product
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function removeFromCart(Product $product)
     {
-        $cart = $request->session()->get('cart.products');
+        $cart = request()->session()->get('cart.products');
 
-        if ($product->id) {
+        if ($product->getKey()) {
 
-            $keySession = array_search($product->id, $cart);
+            $keySession = array_search($product->getKey(), $cart);
 
             if (isset($cart[$keySession])) {
-
-                //unset the id for product from session
+                // unset the id for product from session
                 unset($cart[$keySession]);
-                $request->session()->put('cart.products', $cart);
+
+                request()->session()->put('cart.products', $cart);
             }
         }
+
         return redirect()->route('checkout');
     }
 
-    public function checkoutCart(Request $request)
+    /**
+     * Persist data from form, send email
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function checkoutCart()
     {
-        // persist data from form, send email
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-        ]);
+        $this->validateCheckout();
 
-        $cart = $request->session()->has('cart.products') ? $request->session()->get('cart.products') : [];
-        $products = Product::whereIn('id', $cart)->get();
+        $cart = request()->session()->get('cart.products', []);
+
+        $products = Product::query()->whereIn('id', $cart)->get();
 
         if (! empty($cart)) {
 
+            $order = new Order($this->validateCheckout());
+            $order->save();
+
+            foreach ($cart as $id) {
+                $orderProduct = new OrderProduct(['order_id' => $order->getKey(), 'product_id' => $id]);
+                $orderProduct->save();
+            }
+
+            // send email
             Mail::to(request('email'))->send(new Checkout($products));
 
             // clean session
-            $request->session()->forget('cart.products');
+            request()->session()->forget('cart.products');
 
             return redirect()->route('cart')->with('message', 'Email sent');
 
@@ -62,5 +83,19 @@ class CartController extends Controller
 
             return redirect()->route('checkout')->with('message', 'Cart empty');
         }
+    }
+
+    /**
+     * Validate attributes for checkout
+     *
+     * @return array
+     */
+    public function validateCheckout()
+    {
+        return request()->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'comment' => 'required',
+        ]);
     }
 }

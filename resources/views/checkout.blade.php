@@ -3,12 +3,15 @@
 @section('checkout')
     <form method="post" action="{{ route('cart') }}">
         @csrf
+
         <?php if (session('message')) : ?>
         <div>
             {{ session('message') }}
         </div>
         <?php endif ?>
+
         <br>
+
         <input id="name" type="text" name="name" class="@error('name') is-invalid @enderror" placeholder="{{ __('Name') }}"
                value="{{ old('name') }}"/>
         @error('name')
@@ -24,6 +27,7 @@
         <textarea id="comment" name="comment" cols="20" rows="7"
                   placeholder="{{ __('Comment') }}">{{ old('comment') }}</textarea>
         <br/><br/>
+
         <input type="submit" name="submit" value="{{ __('Checkout') }}">
     </form>
 @endsection

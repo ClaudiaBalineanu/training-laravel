@@ -1,19 +1,21 @@
+<?php
+/**
+ * @var \Illuminate\Database\Eloquent\Collection $products
+ * @var \App\Product $product
+ */
+?>
 @extends ('layout')
 
 @section ('content')
     <h3>{{ __('Cart') }}</h3>
 
-    <?php /** @var \Illuminate\Database\Eloquent\Collection $products */ ?>
-
     <?php if ($products->isNotEmpty()) : ?>
         <table>
-
-            <?php /** @var \App\Product $product */ ?>
 
                 <?php foreach ($products as $product) : ?>
                     <tr>
                         <td>
-                            <img src="images/{{ $product->image }}" width="100" height="100" alt="{{ __('Image product') }}">
+                            <img src="{{ asset('images/' . $product->image) }}" width="100" height="100" alt="{{ __('Image product') }}">
                         </td>
                         <td>
                             {{ $product->title }}<br/>

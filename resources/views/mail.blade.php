@@ -1,14 +1,16 @@
+<?php
+/**
+ * @var \Illuminate\Database\Eloquent\Collection $products
+ * @var \App\Product $product
+ */
+?>
 @extends ('layout')
 
 @section ('content')
     <h3>{{ __('Products in mail') }}</h3>
 
-    <?php /** @var \Illuminate\Database\Eloquent\Collection $products */ ?>
-
         <?php if ($products->isNotEmpty()) : ?>
             <table>
-
-                <?php /** @var \App\Product $product */ ?>
 
                     <?php foreach ($products as $product) : ?>
                         <tr>
