@@ -1,16 +1,26 @@
+<?php
+/**
+ * @var \App\Product $product
+ */
+?>
 @extends ('layout')
 
 @section('content')
-    <?php /** @var \App\Product $product */ ?>
-    <form method="POST" action="{{ route('update', $product->getKey()) }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ isset($product) ? route('update', $product->getKey()) : route('store') }}" enctype="multipart/form-data">
         @csrf
-        @method('PUT')
-        <?php if (session('message')) : ?>
-        <div>
-            {{ session('message') }}
-        </div>
+
+        <?php if (isset($product)) : ?>
+            @method('PUT')
         <?php endif ?>
+
+        <?php if (session('message')) : ?>
+            <div>
+                {{ session('message') }}
+            </div>
+        <?php endif ?>
+
         <br>
+
         <input id="title" type="text" name="title" class="@error('title') is-invalid @enderror" placeholder="{{ __('Title') }}"
                value="{{ isset($product) ? $product->title : old('title') }}"/>
         @error('title')

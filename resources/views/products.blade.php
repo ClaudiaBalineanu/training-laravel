@@ -1,20 +1,23 @@
+<?php
+/**
+ * @var \Illuminate\Database\Eloquent\Collection $products
+ * @var \App\Product $product
+ */
+?>
 @extends ('layout')
 
 @section ('content')
 
-    <h3>Products</h3>
-    <h5>Welcome, {{ Auth::user()->name }}</h5>
-
-    <?php /** @var \Illuminate\Database\Eloquent\Collection $products */ ?>
+    <h3>{{ __('Products') }}</h3>
+    <h5>{{ __('Welcome,') }} {{ auth()->user()->name }}</h5>
 
     <?php if ($products->isNotEmpty()) : ?>
         <table>
-            <?php /** @var \App\Product $product */ ?>
 
             <?php foreach ($products as $product) : ?>
                 <tr>
                     <td>
-                        <img src="images/{{ $product->image }}" width="100" height="100" alt="{{ __('Image product') }}">
+                        <img src="{{ asset('images/' . $product->image) }}" width="100" height="100" alt="{{ __('Image product') }}">
                     </td>
                     <td>
                         {{ $product->title }}<br/>
@@ -34,7 +37,10 @@
     <?php else : ?>
         {{ __('No data') }}
     <?php endif ?>
+
     <a href="{{ route('create') }}">{{ __('Add') }}</a>
+
+    <a href="{{ route('orders') }}">{{ __('Orders') }}</a>
 
     <br>
     <!--  snippet code taken from app.blade.php for logout, doesn't work without form and onclick  -->
