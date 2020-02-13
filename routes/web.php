@@ -10,6 +10,18 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+// tests route
+Route::get('/test', function(){
+    //return \App\Product::with('orders')->sum('price');
+    $orders = \App\Order::with('products')->get();
+    foreach ($orders as $order) {
+        $order['total'] = $order->products->sum('price');
+    }
+    $r = ''; //route('create');  // Storage::get('file.jpg')
+    //return asset('images/' . '1.jpg'); //Storage::get('1.jpg');  //url('/images/') . '1.jpg';  // request()->url();  //$order->products; // url('/')
+    return $orders;
+});
+
 
 // index and add to cart
 Route::get('/index', 'ProductsController@index')->name('index');
@@ -33,18 +45,13 @@ Route::post('/products', 'ProductsController@store')->name('store');
 Route::get('/products/create', 'ProductsController@create')->name('create')->middleware('auth');
 
 // edit and persist a product
-Route::put('/products/{product}', 'ProductsController@update')->name('update');
-Route::get('/products/{product}/edit', 'ProductsController@edit')->name('edit')->middleware('auth');
+Route::put('/products/{product}', 'ProductsController@update')->name('update')->middleware('auth');
+Route::get('/products/edit/{product}', 'ProductsController@edit')->name('edit')->middleware('auth');
 
 // delete a product
-Route::get('/products/delete/{product}', 'ProductsController@delete')->name('delete');
+Route::get('/products/delete/{product}', 'ProductsController@delete')->name('delete')->middleware('auth');
 
-
-
-
-
-
-
-
-
+// orders
+Route::get('/orders', 'OrdersController@index')->name('orders')->middleware('auth');
+Route::get('/orders/{order}', 'OrdersController@show')->name('order')->middleware('auth');
 
