@@ -59,7 +59,7 @@ class ProductsController extends Controller
     }
 
     /**
-     * Return the view to create a product
+     * Return the view to create a product.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
