@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 class CreateProductsTable extends Migration
 {
     /**
-     * Run the migrations.
+     * Run the migrations for products.
      *
      * @return void
      */

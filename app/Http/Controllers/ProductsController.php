@@ -106,8 +106,6 @@ class ProductsController extends Controller
 
         $product->update($this->validateProduct());
 
-        //$product->save();
-
         // delete the old image from sever
         if (isset($img) && File::exists(public_path('images') . '\\' . $img)) {
             File::delete(public_path('images') . '\\' . $img);

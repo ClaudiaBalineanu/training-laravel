@@ -26,7 +26,7 @@
                         <a href="{{ route('addToCart.product', $product) }}">{{ __('Add') }}</a>
                     </td>
                 </tr>
-            <?php endforeach ?>
+            <?php endforeach; ?>
 
         </table>
     <?php else : ?>

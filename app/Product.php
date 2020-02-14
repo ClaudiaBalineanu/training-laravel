@@ -8,14 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     /*
-     * laravel try to insert in tables the columns created_at and updated_at,
-     * but i don't have this columns in my table
-     *
      * @var bool
      */
     public $timestamps = false;
 
     /**
+     * The attributes that aren't mass assignable.
+     *
      * @var array
      */
     protected $guarded = [];

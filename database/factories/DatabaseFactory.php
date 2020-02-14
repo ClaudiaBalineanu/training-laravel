@@ -16,6 +16,8 @@ use Faker\Generator as Faker;
 |
 */
 
+// factory for products table
+
 $factory->define(Product::class, function (Faker $faker) {
     return [
         'title' => $faker->title,
