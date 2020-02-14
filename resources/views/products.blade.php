@@ -31,7 +31,7 @@
                         <a href="{{ route('delete', $product->getKey()) }}">{{ __('Delete') }}</a>
                     </td>
                 </tr>
-            <?php endforeach ?>
+            <?php endforeach; ?>
 
         </table>
     <?php else : ?>

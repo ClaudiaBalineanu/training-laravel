@@ -27,7 +27,7 @@ class ProductsController extends Controller
     }
 
     /**
-     * Add to cart product
+     * Add to cart product.
      *
      * @param Product $product
      * @return \Illuminate\Http\RedirectResponse
