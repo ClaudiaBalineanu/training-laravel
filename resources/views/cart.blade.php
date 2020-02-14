@@ -18,15 +18,15 @@
                             <img src="{{ asset('images/' . $product->image) }}" width="100" height="100" alt="{{ __('Image product') }}">
                         </td>
                         <td>
-                            {{ $product->title }}<br/>
-                            {{ $product->description }}<br/>
-                            {{ $product->price }}<br/>
+                            {{ $product->title }} <br/>
+                            {{ $product->description }} <br/>
+                            {{ $product->price }} <br/>
                         </td>
                         <td>
                             <a href="{{ route('removeFromCart.product', $product->getKey()) }}">{{ __('Remove') }}</a>
                         </td>
                     </tr>
-                <?php endforeach ?>
+                <?php endforeach; ?>
 
         </table>
     <?php else : ?>

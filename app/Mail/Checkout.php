@@ -14,7 +14,7 @@ class Checkout extends Mailable
     public $products;
 
     /**
-     * Create a new message instance.
+     * Create a new message instance - checkout.
      *
      * @param Collection $products
      */

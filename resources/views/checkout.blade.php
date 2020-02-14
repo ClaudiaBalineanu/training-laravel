@@ -8,7 +8,7 @@
         <div>
             {{ session('message') }}
         </div>
-        <?php endif ?>
+        <?php endif; ?>
 
         <br>
 

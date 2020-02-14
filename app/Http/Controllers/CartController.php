@@ -24,7 +24,7 @@ class CartController extends Controller
     }
 
     /**
-     * Remove an item (product) from cart
+     * Remove product from cart
      *
      * @param Product $product
      * @return \Illuminate\Http\RedirectResponse
