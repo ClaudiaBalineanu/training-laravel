@@ -7,7 +7,7 @@ use App\Order;
 class OrdersController extends Controller
 {
     /**
-     * Display all orders
+     * Display all orders.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */

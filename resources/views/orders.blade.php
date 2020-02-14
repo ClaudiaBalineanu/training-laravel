@@ -37,7 +37,7 @@
                 {{ $order->total }}<br>
             </td>
         </tr>
-        <?php endforeach ?>
+        <?php endforeach; ?>
 
     </table>
     <?php else : ?>

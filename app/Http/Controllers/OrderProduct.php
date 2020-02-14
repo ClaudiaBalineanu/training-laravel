@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class OrderProduct extends Pivot
 {
     /**
-     * Indicates if the IDs are auto-incrementing.
+     * Indicates if the IDs are auto-incrementing
      *
      * @var bool
      */
