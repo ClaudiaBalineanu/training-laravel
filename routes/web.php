@@ -10,18 +10,6 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-// tests route
-Route::get('/test', function(){
-    //return \App\Product::with('orders')->sum('price');
-    $orders = \App\Order::with('products')->get();
-    foreach ($orders as $order) {
-        $order['total'] = $order->products->sum('price');
-    }
-    $r = ''; //route('create');  // Storage::get('file.jpg')
-    //return asset('images/' . '1.jpg'); //Storage::get('1.jpg');  //url('/images/') . '1.jpg';  // request()->url();  //$order->products; // url('/')
-    return $orders;
-});
-
 
 // index and add to cart
 Route::get('/index', 'ProductsController@index')->name('index');
