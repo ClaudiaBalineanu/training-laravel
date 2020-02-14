@@ -36,7 +36,7 @@
 
                     </ul>
 
-                    <!-- Right Side Of Navbar -->
+                    <!-- Right Side of Navbar -->
                     <ul class="navbar-nav ml-auto">
                         <!-- Authentication Links -->
                         @guest

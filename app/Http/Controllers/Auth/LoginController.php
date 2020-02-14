@@ -41,7 +41,7 @@ class LoginController extends Controller
     }
 
     /**
-     * The logout function
+     * The logout function.
      *
      * @return RedirectResponse
      */
