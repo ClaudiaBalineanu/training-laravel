@@ -53,7 +53,7 @@
                 {{ $product->price }}<br/>
             </td>
         </tr>
-        <?php endforeach ?>
+        <?php endforeach; ?>
 
     </table>
     <?php else : ?>

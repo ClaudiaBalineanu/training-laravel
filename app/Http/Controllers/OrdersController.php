@@ -23,7 +23,7 @@ class OrdersController extends Controller
     }
 
     /**
-     * Display an order with specific products
+     * Display an order with specific products.
      *
      * @param Order $order
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
