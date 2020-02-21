@@ -18,6 +18,7 @@ class CreateOrdersTable extends Migration
             $table->string('name');
             $table->string('email');
             $table->string('comment');
+            $table->timestamps();
         });
 
         Schema::create('order_product', function (Blueprint $table) {

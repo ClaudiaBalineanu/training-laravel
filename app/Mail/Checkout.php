@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use App\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -11,16 +11,16 @@ class Checkout extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $products;
+    public $order;
 
     /**
-     * Create a new message instance - checkout.
+     * Checkout constructor.
      *
-     * @param Collection $products
+     * @param Order $order
      */
-    public function __construct(Collection $products)
+    public function __construct(Order $order)
     {
-        $this->products = $products;
+        $this->order = $order;
     }
 
     /**
@@ -30,6 +30,6 @@ class Checkout extends Mailable
      */
     public function build()
     {
-        return $this->view('mail');
+        return $this->view('cart.mail');
     }
 }

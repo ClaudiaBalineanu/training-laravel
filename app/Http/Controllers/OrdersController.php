@@ -13,13 +13,9 @@ class OrdersController extends Controller
      */
     public function index()
     {
-        $orders = Order::with('products')->get();
+        $orders = Order::with('value')->get();
 
-        foreach ($orders as $order) {
-            $this->totals($order);
-        }
-
-        return view('orders', compact('orders'));
+        return view('orders.index', compact('orders'));
     }
 
     /**
@@ -30,20 +26,7 @@ class OrdersController extends Controller
      */
     public function show(Order $order)
     {
-        $this->totals($order);
-
-        return view('order', compact('order'));
-    }
-
-    /**
-     * The total per order, the summed prices of products per order
-     *
-     * @param Order $order
-     * @return mixed
-     */
-    public function totals(Order $order)
-    {
-        return $order['total'] = $order->products->sum('price');
+        return view('orders.order', compact('order'));
     }
 
 }

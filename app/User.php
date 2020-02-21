@@ -36,4 +36,22 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * make cont disable
+     */
+    public function disable()
+    {
+        $this->status = false;
+        $this->save();
+    }
+
+    /**
+     * make cont enable
+     */
+    public function enable()
+    {
+        $this->status = true;
+        $this->save();
+    }
 }

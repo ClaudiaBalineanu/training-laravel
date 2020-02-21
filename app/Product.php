@@ -2,16 +2,10 @@
 
 namespace App;
 
-use App\Http\Controllers\OrderProduct;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    /*
-     * @var bool
-     */
-    public $timestamps = false;
-
     /**
      * The attributes that aren't mass assignable.
      *
@@ -26,5 +20,22 @@ class Product extends Model
     {
         return $this->belongsToMany(Order::class)->using(OrderProduct::class);
     }
+
+    /**
+     * @return string
+     */
+    public function getImagePath()
+    {
+        return public_path('images') . '\\' . $this->image;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImageUrl()
+    {
+        return url('images/' . $this->image);
+    }
+
 }
 

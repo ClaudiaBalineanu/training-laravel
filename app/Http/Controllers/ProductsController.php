@@ -15,7 +15,7 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        $cart = request()->session()->get('cart.products');
+        $cart = request()->session()->get('cart.products', []);
 
         if ($cart) {
             $products = Product::query()->whereNotIn('id', $cart)->get();
@@ -23,11 +23,15 @@ class ProductsController extends Controller
             $products = Product::query()->get();
         }
 
-        return view('index', compact('products'));
+        if (request()->ajax()) {
+            return $products;
+        }
+
+        return view('products.index', compact('products'));
     }
 
     /**
-     * Add to cart product.
+     * Add a product to cart
      *
      * @param Product $product
      * @return \Illuminate\Http\RedirectResponse
@@ -43,7 +47,11 @@ class ProductsController extends Controller
             request()->session()->put('cart.products', $cart);
         }
 
-        return redirect()->route('index');
+        if (request()->ajax()) {
+            return ['success' => true];
+        }
+
+        return redirect()->route('home');
     }
 
     /**
@@ -53,7 +61,7 @@ class ProductsController extends Controller
      */
     public function show()
     {
-        return view('products', [
+        return view('products.products', [
             'products' => Product::all()
         ]);
     }
@@ -65,7 +73,7 @@ class ProductsController extends Controller
      */
     public function create()
     {
-        return view('crud');
+        return view('products.save');
     }
 
     /**
@@ -75,7 +83,16 @@ class ProductsController extends Controller
      */
     public function store()
     {
-        $product = new Product($this->validateProduct());
+        $validateAttributes = $this->validateProduct();
+        // make the name of the image unique
+        $imageName = uniqid() . '.' . request()->image->getClientOriginalExtension();
+
+        // save the image in the folder
+        request()->image->move(public_path('images'), $imageName);
+
+        $validateAttributes['image'] = $imageName;
+
+        $product = new Product($validateAttributes);
 
         $product->save();
 
@@ -90,7 +107,7 @@ class ProductsController extends Controller
      */
     public function edit(Product $product)
     {
-        return view('crud', compact('product'));
+        return view('products.save', compact('product'));
     }
 
     /**
@@ -102,13 +119,22 @@ class ProductsController extends Controller
     public function update(Product $product)
     {
         // save the name af the old image
-        $img = $product->image;
+        $oldImage = $product->getImagePath();
 
-        $product->update($this->validateProduct());
+        $validateAttributes = $this->validateProduct();
+        // make the name of the image unique
+        $imageName = uniqid() . '.' . request()->image->getClientOriginalExtension();
+
+        // save the image in the folder
+        request()->image->move(public_path('images'), $imageName);
+
+        $validateAttributes['image'] = $imageName;
+
+        $product->update($validateAttributes);
 
         // delete the old image from sever
-        if (isset($img) && File::exists(public_path('images') . '\\' . $img)) {
-            File::delete(public_path('images') . '\\' . $img);
+        if (File::exists($oldImage)) {
+            File::delete($oldImage);
         }
 
         return redirect()->route('products');
@@ -121,22 +147,12 @@ class ProductsController extends Controller
      */
     public function validateProduct()
     {
-        $validateAttributes = request()->validate([
+        return request()->validate([
             'title' => 'required|min:3|regex:/^[a-zA-Z ]*$/',
             'description' => 'required',
-            'price' => 'required|regex:/^[0-9]*\.[0-9]+$/',
+            'price' => 'required|numeric',
             'image' => 'required|image'
         ]);
-
-        // make the name of the image unique
-        $imageName = uniqid() . '.' . request()->image->getClientOriginalExtension();
-
-        // save the image in the folder
-        request()->image->move(public_path('images'), $imageName);
-
-        $validateAttributes['image'] = $imageName;
-
-        return $validateAttributes;
     }
 
     /**
@@ -148,13 +164,13 @@ class ProductsController extends Controller
      */
     public function delete(Product $product)
     {
-        $img = $product->image;
-
         $product->delete();
 
+        $oldImage = $product->getImagePath();
+
         // delete the image form server
-        if(isset($img) && File::exists(public_path('images') . '\\' . $img)) {
-            File::delete(public_path('images') . '\\' . $img);
+        if(File::exists($oldImage)) {
+            File::delete($oldImage);
         }
 
         return redirect()->route('products');

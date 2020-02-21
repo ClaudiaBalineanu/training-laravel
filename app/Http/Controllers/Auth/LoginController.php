@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -51,4 +53,23 @@ class LoginController extends Controller
 
         return redirect()->route('login');
     }
+
+    /**
+     * @inheritDoc
+     */
+    protected function validateLogin(Request $request)
+    {
+        $user = User::query()->where('email', $request->email)->first();
+
+        if ($user->status) {
+            $request->merge(['status' => $user->status]);
+        }
+
+        $request->validate([
+            $this->username() => 'required|string',
+            'password' => 'required|string',
+            'status' => 'required'
+        ]);
+    }
+
 }

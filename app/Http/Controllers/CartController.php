@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\Checkout;
 use App\Order;
+use App\OrderProduct;
 use App\Product;
 use Illuminate\Support\Facades\Mail;
 
@@ -20,7 +21,11 @@ class CartController extends Controller
 
         $products = Product::query()->whereIn('id', $cart)->get();
 
-        return view('checkout', compact('products'));
+        if (request()->ajax()) {
+            return $products;
+        }
+
+        return view('cart.index', compact('products'));
     }
 
     /**
@@ -29,23 +34,20 @@ class CartController extends Controller
      * @param Product $product
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function removeFromCart(Product $product)
+    public function remove(Product $product)
     {
         $cart = request()->session()->get('cart.products');
 
-        if ($product->getKey()) {
+        $keySession = array_search($product->getKey(), $cart);
 
-            $keySession = array_search($product->getKey(), $cart);
+        if (isset($cart[$keySession])) {
+            // unset the id for product from session
+            unset($cart[$keySession]);
 
-            if (isset($cart[$keySession])) {
-                // unset the id for product from session
-                unset($cart[$keySession]);
-
-                request()->session()->put('cart.products', $cart);
-            }
+            request()->session()->put('cart.products', $cart);
         }
 
-        return redirect()->route('checkout');
+        return redirect()->route('cart');
     }
 
     /**
@@ -53,13 +55,11 @@ class CartController extends Controller
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function checkoutCart()
+    public function checkout()
     {
         $this->validateCheckout();
 
         $cart = request()->session()->get('cart.products', []);
-
-        $products = Product::query()->whereIn('id', $cart)->get();
 
         if (! empty($cart)) {
 
@@ -67,21 +67,19 @@ class CartController extends Controller
             $order->save();
 
             foreach ($cart as $id) {
-                $orderProduct = new OrderProduct(['order_id' => $order->getKey(), 'product_id' => $id]);
-                $orderProduct->save();
+                $order->products()->attach($id);
             }
-
-            // send email
-            Mail::to(request('email'))->send(new Checkout($products));
 
             // clean session
             request()->session()->forget('cart.products');
 
+            // send email
+            Mail::to(request('email'))->send(new Checkout($order));
+
             return redirect()->route('cart')->with('message', 'Email sent');
 
         } else {
-
-            return redirect()->route('checkout')->with('message', 'Cart empty');
+            return redirect()->route('cart')->with('message', 'Cart empty');
         }
     }
 

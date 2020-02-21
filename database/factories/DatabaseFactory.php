@@ -2,6 +2,8 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
+use App\Order;
+use App\OrderProduct;
 use App\Product;
 use Faker\Generator as Faker;
 
@@ -21,8 +23,23 @@ use Faker\Generator as Faker;
 $factory->define(Product::class, function (Faker $faker) {
     return [
         'title' => $faker->title,
-        'description' => $faker->paragraph,
+        'description' => $faker->sentence,
         'price' => $faker->randomFloat(2, 0, 1000),
         'image' => '1.jpg',
+    ];
+});
+
+$factory->define(Order::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->email,
+        'comment' => $faker->paragraph,
+    ];
+});
+
+$factory->define(OrderProduct::class, function (Faker $faker) {
+    return [
+        'order_id' => factory(Order::class),
+        'product_id' => factory(Product::class),
     ];
 });
