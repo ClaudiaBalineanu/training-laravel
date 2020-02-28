@@ -74,35 +74,6 @@
                 return html;
             }
 
-            function checkout() {
-                return [
-                    '<form method="POST" class="checkout" action="' + window.location.href + '">',
-                        '@csrf',
-                        '<span class="message"></span>',
-                        '<input id="name" type="text" name="name" placeholder="{{ __('Name') }}">',
-                        '<span class="name error"></span>',
-                        '<input id="email" type="email" name="email" placeholder="{{ __('Email') }}">',
-                        '<span class="email error"></span>',
-                        '<textarea id="comment" name="comment" cols="20" rows="7" placeholder="{{ __('Comment') }}"></textarea>',
-                        '<span class="comment error"></span>',
-                        '<input type="submit" class="submit" name="submit" value="{{ __('Checkout') }}">',
-                    '</form>'
-                ].join('');
-            }
-
-            function getLogin() {
-                return [
-                    '<form method="POST" class="form_login" action="' + window.location.origin + '/login' + '">',
-                        '@csrf',
-                        '<input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">',
-                        '<span class="email error"></span>',
-                        '<input id="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">',
-                        '<span class="password error"></span>',
-                        '<input type="submit" class="submit" name="" value="{{ __('Login') }}">',
-                    '</form>'
-                ].join('');
-            }
-
             function getSaveForm(product = '', parts = '') {
 
                 var url = window.location.origin + window.location.pathname + '#products';
@@ -199,7 +170,6 @@
                             success: function (response) {
                                 // Render the products in the cart list
                                 $('.cart .list').html(renderList(response, parts[0]));
-                                $('.cart .checkout').html(checkout());
 
                                 $('.cart form.checkout').on('submit', function(e) {
                                     e.preventDefault();
@@ -209,12 +179,10 @@
                                     $('.checkout .message').empty();
 
                                     $.ajax('/cart', {
-                                        type: "POST",
+                                        method: 'POST',
                                         data: $('.cart .checkout').serialize(),
                                         success: function (response) {
-                                            // to delete the products from cart ?!?!?!
                                             $('.cart .list').empty();
-
                                             $('.checkout .message').append(response.message);
                                         },
                                         error: function (response) {
@@ -273,7 +241,7 @@
                             success: function (response) {
                                 $('.product .save_div').html(getSaveForm(response, parts[1]));
 
-                                $('.save_form .submit').on('click', function(e) {
+                                $('.product form.save_form').on('submit', function(e) {
                                     e.preventDefault();
                                     // empty span with errors, if not each time click submit display message or error
                                     $('.save_form .error').empty();
@@ -281,7 +249,7 @@
                                     var formData = $('.save_form').get(0);
 
                                     $.ajax('/products/' + parts[1], {
-                                        type: "POST",
+                                        method: 'POST',
                                         data: new FormData(formData),
                                         cache: false,
                                         contentType: false,
@@ -307,7 +275,7 @@
 
                         $('.product .save_div').html(getSaveForm());
 
-                        $('.save_form .submit').on('click', function(e) {
+                        $('.product form.save_form').on('submit', function(e) {
                             e.preventDefault();
 
                             // empty span with errors, if not each time click submit display message or error
@@ -316,7 +284,7 @@
                             var formData = $('.save_form').get(0);
 
                             $.ajax('/products', {
-                                type: "POST",
+                                method: 'POST',
                                 data: new FormData(formData),
                                 cache: false,
                                 contentType: false,
@@ -361,8 +329,6 @@
                     case '#login':
                         $('.login').show();
 
-                        //$('.login .login_div').html(getLogin());
-
                         $('.login form.form_login').on('submit', function(e) {
                             e.preventDefault();
 
@@ -391,14 +357,11 @@
                                         $.each(errors, function (key, value) {
                                             $('.form_login .' + key +  '.error').append(value);
                                         });
-                                    } // end if
+                                    }
                                 }
                             });
-
                         });
-
                         break;
-
                     case '#logout':
                         $.ajax('/logout', {
                             method: 'POST',
@@ -412,8 +375,6 @@
                                 }
                             },
                             error: function (response) {
-                                console.log(456, response);
-
                                 if (response.status === 422) {
                                     var errors = response.responseJSON.errors;
                                     $.each(errors, function (key, value) {
@@ -422,7 +383,6 @@
                                 } // end if
                             }
                         });
-
                         break;
 
                     default:
@@ -467,7 +427,23 @@
     <!-- The cart element where the products list is rendered -->
     <table class="list"></table>
 
-    <div class="checkout"></div>
+    <div class="checkout">
+        <form method="POST" class="checkout" action="https://training-laravel.local.ro/spa#cart">
+
+            <span class="message"></span>
+
+            <input type="text" name="name" placeholder="{{ __('Name') }}">
+            <span class="name error"></span>
+
+            <input type="email" name="email" placeholder="{{ __('Email') }}">
+            <span class="email error"></span>
+
+            <textarea name="comment" cols="20" rows="7" placeholder="{{ __('Comment') }}"></textarea>
+            <span class="comment error"></span>
+
+            <input type="submit" class="submit" name="submit" value="{{ __('Checkout') }}">
+        </form>
+    </div>
 
     <!-- A link to go to the index by changing the hash -->
     <a href="#" class="button">{{ __('Go to index') }}</a>
@@ -481,10 +457,12 @@
     <div class="login_div">
         <form method="POST" class="form_login" action="https://training-laravel.local.ro/login">
 
-            <input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}" />
+            <input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">
             <span class="email error"></span>
+
             <input id="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">
             <span class="password error"></span>
+
             <input type="submit" class="submit" name="" value="{{ __('Login') }}">
         </form>
     </div>
