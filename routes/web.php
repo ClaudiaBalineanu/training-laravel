@@ -56,29 +56,29 @@ Route::get('/cart', 'CartController@cart')->name('cart');
 Route::get('/cart/add/{product}', 'ProductsController@addToCart')->name('cart.add');
 Route::get('/cart/remove/{product}', 'CartController@remove')->name('cart.remove');
 
-// checkout (cart page) send email
+// checkout (cart page) send email /checkout
 Route::post('/cart', 'CartController@checkout')->name('checkout');
 
 // for login, authenticate
 Auth::routes();
 
 // show all products
-Route::get('/products', 'ProductsController@show')->name('products')->middleware('auth');
+Route::get('/products', 'ProductsController@show')->name('products'); // ->middleware('auth')
 
 // create and persist a product
 Route::post('/products', 'ProductsController@store')->name('store');
-Route::get('/products/create', 'ProductsController@create')->name('create')->middleware('auth');
+Route::get('/products/create', 'ProductsController@create')->name('create'); //->middleware('auth')
 
 // edit and persist a product
-Route::put('/products/{product}', 'ProductsController@update')->name('update')->middleware('auth');
-Route::get('/products/edit/{product}', 'ProductsController@edit')->name('edit')->middleware('auth');
+Route::put('/products/{product}', 'ProductsController@update')->name('update'); //->middleware('auth')
+Route::get('/products/edit/{product}', 'ProductsController@edit')->name('edit'); //->middleware('auth')
 
 // delete a product
-Route::get('/products/delete/{product}', 'ProductsController@delete')->name('delete')->middleware('auth');
+Route::get('/products/delete/{product}', 'ProductsController@delete')->name('delete'); //->middleware('auth')
 
 // orders
-Route::get('/orders', 'OrdersController@index')->name('orders')->middleware('auth');
-Route::get('/orders/{order}', 'OrdersController@show')->name('order')->middleware('auth');
+Route::get('/orders', 'OrdersController@index')->name('orders'); //->middleware('auth')
+Route::get('/order/{order}', 'OrdersController@show')->name('order'); //->middleware('auth')
 
 
 

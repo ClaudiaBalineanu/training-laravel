@@ -19,7 +19,10 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next, $guard = null)
     {
         if (Auth::guard($guard)->check()) {
-            return redirect(RouteServiceProvider::HOME);
+            if ($request->ajax()) {
+                return ['success' => false];
+            }
+            return redirect(RouteServiceProvider::HOME); // it works to: route('/products')
         }
 
         return $next($request);

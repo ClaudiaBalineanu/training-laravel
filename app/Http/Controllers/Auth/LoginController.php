@@ -23,10 +23,30 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    use AuthenticatesUsers {
+        sendFailedLoginResponse as sendFailedLoginResponseOriginal;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        if (request()->ajax()) {
+            return [
+                'success' => false,
+                'errors' => [
+                    $this->username() => [trans('auth.failed')],
+                ]
+            ];
+        }
+
+        $this->sendFailedLoginResponseOriginal($request);
+    }
 
     /**
      * Where to redirect users after login.
+     * '/products'
      *
      * @var string
      */
@@ -45,31 +65,13 @@ class LoginController extends Controller
     /**
      * The logout function.
      *
-     * @return RedirectResponse
+     * @return array
      */
     public function logout()
     {
         Auth::logout();
 
         return redirect()->route('login');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function validateLogin(Request $request)
-    {
-        $user = User::query()->where('email', $request->email)->first();
-
-        if ($user->status) {
-            $request->merge(['status' => $user->status]);
-        }
-
-        $request->validate([
-            $this->username() => 'required|string',
-            'password' => 'required|string',
-            'status' => 'required'
-        ]);
     }
 
 }
