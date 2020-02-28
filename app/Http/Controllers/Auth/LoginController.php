@@ -24,20 +24,37 @@ class LoginController extends Controller
     */
 
     use AuthenticatesUsers {
+        sendLoginResponse as sendLoginResponseOriginal;
         sendFailedLoginResponse as sendFailedLoginResponseOriginal;
     }
 
     /**
      * @inheritDoc
      */
+    /*
     protected function authenticated(Request $request, $user)
     {
-        if ($user = Auth::user()) {
+
             if ($request->ajax()) {
                 return ['success' => true];
             }
+
+
+    }
+    */
+
+    /**
+     * @inheritDoc
+     */
+    protected function sendLoginResponse(Request $request)
+    {
+        if (request()->ajax()) {
+            return [
+                'success' => true,
+            ];
         }
 
+        $this->sendLoginResponseOriginal($request);
     }
 
     /**
@@ -80,11 +97,13 @@ class LoginController extends Controller
      *
      * @return array
      */
-    public function logout()
+    protected function loggedOut(Request $request)
     {
-        Auth::logout();
-
-        return redirect()->route('login');
+        if (request()->ajax()) {
+            return [
+                'success' => true,
+            ];
+        }
     }
 
 }

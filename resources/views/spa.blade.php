@@ -1,6 +1,8 @@
 <html>
 <head>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <!-- Load the jQuery JS library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
@@ -17,6 +19,12 @@
     <!-- Custom JS script -->
     <script type="text/javascript">
         $(document).ready(function () {
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
 
             /**
              * A function that takes a products array and renders it's html
@@ -78,6 +86,19 @@
                         '<textarea id="comment" name="comment" cols="20" rows="7" placeholder="{{ __('Comment') }}"></textarea>',
                         '<span class="comment error"></span>',
                         '<input type="submit" class="submit" name="submit" value="{{ __('Checkout') }}">',
+                    '</form>'
+                ].join('');
+            }
+
+            function getLogin() {
+                return [
+                    '<form method="POST" class="form_login" action="' + window.location.origin + '/login' + '">',
+                        '@csrf',
+                        '<input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">',
+                        '<span class="email error"></span>',
+                        '<input id="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">',
+                        '<span class="password error"></span>',
+                        '<input type="submit" class="submit" name="" value="{{ __('Login') }}">',
                     '</form>'
                 ].join('');
             }
@@ -180,7 +201,7 @@
                                 $('.cart .list').html(renderList(response, parts[0]));
                                 $('.cart .checkout').html(checkout());
 
-                                $('.cart .submit').on('click', function(e) {
+                                $('.cart form.checkout').on('submit', function(e) {
                                     e.preventDefault();
 
                                     // empty span with errors, if not each time click submit display message or error
@@ -340,7 +361,9 @@
                     case '#login':
                         $('.login').show();
 
-                        $('.login .submit').on('click', function(e) {
+                        //$('.login .login_div').html(getLogin());
+
+                        $('.login form.form_login').on('submit', function(e) {
                             e.preventDefault();
 
                             $('.form_login .error').empty();
@@ -352,16 +375,13 @@
                                 success: function (response) {
                                     console.log(123, response);
 
-                                    if (response.errors) {
+                                    if (response.success) {
+                                        window.location.hash = '#products';
+                                    } else if (response.errors) {
                                         $.each(response.errors, function (key, value) {
                                             $('.form_login .' + key +  '.error').append(value);
                                         });
-                                    } else {
-                                        console.log(789, response);
-                                        //window.location.hash = '#products';
                                     }
-
-
                                 },
                                 error: function (response) {
                                     console.log(456, response);
@@ -375,6 +395,32 @@
                                 }
                             });
 
+                        });
+
+                        break;
+
+                    case '#logout':
+                        $.ajax('/logout', {
+                            method: 'POST',
+                            success: function (response) {
+                                if (response.success) {
+                                    window.location.hash = '#login';
+                                } else if (response.errors) {
+                                    $.each(response.errors, function (key, value) {
+                                        $('.form_login .' + key +  '.error').append(value);
+                                    });
+                                }
+                            },
+                            error: function (response) {
+                                console.log(456, response);
+
+                                if (response.status === 422) {
+                                    var errors = response.responseJSON.errors;
+                                    $.each(errors, function (key, value) {
+                                        $('.form_login .' + key +  '.error').append(value);
+                                    });
+                                } // end if
+                            }
                         });
 
                         break;
@@ -434,12 +480,12 @@
 
     <div class="login_div">
         <form method="POST" class="form_login" action="https://training-laravel.local.ro/login">
-            @csrf
-            <input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">
+
+            <input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}" />
             <span class="email error"></span>
             <input id="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">
             <span class="password error"></span>
-            <input type="submit" class="submit" name="submit" value="{{ __('Login') }}">
+            <input type="submit" class="submit" name="" value="{{ __('Login') }}">
         </form>
     </div>
 
@@ -459,15 +505,9 @@
     <a href="#orders" class="button">{{ __('Orders') }}</a>
 
     <!--  snippet code taken from app.blade.php for logout, doesn't work without form and onclick  -->
-    <a href="#logout"
-       onclick="event.preventDefault();
-       document.getElementById('logout-form').submit();">
+    <a href="#logout">
         {{ __('Logout') }}
     </a>
-
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
-    </form>
 
 </div>
 

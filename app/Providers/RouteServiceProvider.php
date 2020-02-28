@@ -22,7 +22,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/products';    //    '/products'; spa#products-nup
+    public const HOME = '/products';
 
     /**
      * Define your route model bindings, pattern filters, etc.
