@@ -13,7 +13,7 @@ class CartController extends Controller
     /**
      * Show products in cart and the form for checkout
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
     public function cart()
     {
@@ -32,7 +32,7 @@ class CartController extends Controller
      * Remove product from cart
      *
      * @param Product $product
-     * @return \Illuminate\Http\RedirectResponse
+     * @return array
      */
     public function remove(Product $product)
     {
@@ -45,6 +45,10 @@ class CartController extends Controller
             unset($cart[$keySession]);
 
             request()->session()->put('cart.products', $cart);
+        }
+
+        if (request()->ajax()) {
+            return ['success' => true];
         }
 
         return redirect()->route('cart');
@@ -76,9 +80,18 @@ class CartController extends Controller
             // send email
             Mail::to(request('email'))->send(new Checkout($order));
 
+            if (request()->ajax()) {
+                return ['message' => 'Email sent'];
+            }
+
             return redirect()->route('cart')->with('message', 'Email sent');
 
         } else {
+
+            if (request()->ajax()) {
+                return ['message' => 'Cart empty'];
+            }
+
             return redirect()->route('cart')->with('message', 'Cart empty');
         }
     }
