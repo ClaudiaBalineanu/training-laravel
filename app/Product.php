@@ -26,7 +26,8 @@ class Product extends Model
      */
     public function getImagePath()
     {
-        return public_path('images') . '\\' . $this->image;
+        //!!!!!!!!!!! ATENTION !!!!!!!!! from \\ to / for spa
+        return public_path('images') . '/' . $this->image;
     }
 
     /**

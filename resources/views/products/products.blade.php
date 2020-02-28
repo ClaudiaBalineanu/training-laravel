@@ -4,7 +4,6 @@
 @section ('content')
 
     <h3>{{ __('Products') }}</h3>
-    <h5>{{ __('Welcome,') }} {{ auth()->user()->name }}</h5>
 
     <?php if ($products->isNotEmpty()) : ?>
         <table>

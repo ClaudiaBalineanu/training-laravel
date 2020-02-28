@@ -11,9 +11,6 @@
                 display: block;
                 margin-top: 10px;
             }
-            table, th, td {
-                border: 1px solid black;
-            }
         </style>
     </head>
     <body>

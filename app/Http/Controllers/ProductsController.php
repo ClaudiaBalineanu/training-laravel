@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 
 use App\Product;
 use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 
 class ProductsController extends Controller
 {
     /**
      * Render resources, a list of products
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection
      */
     public function index()
     {
@@ -34,7 +36,7 @@ class ProductsController extends Controller
      * Add a product to cart
      *
      * @param Product $product
-     * @return \Illuminate\Http\RedirectResponse
+     * @return array
      */
     public function addToCart(Product $product)
     {
@@ -57,19 +59,23 @@ class ProductsController extends Controller
     /**
      * Show all products from database
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Product[]|\Illuminate\Database\Eloquent\Collection
      */
     public function show()
     {
-        return view('products.products', [
-            'products' => Product::all()
-        ]);
+        $products = Product::all();
+
+        if (request()->ajax()) {
+            return $products;
+        }
+
+        return view('products.products', compact('products'));
     }
 
     /**
      * Return the view to create a product.
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return array
      */
     public function create()
     {
@@ -79,11 +85,12 @@ class ProductsController extends Controller
     /**
      * Persist data of the new product in database
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return array
      */
     public function store()
     {
         $validateAttributes = $this->validateProduct();
+
         // make the name of the image unique
         $imageName = uniqid() . '.' . request()->image->getClientOriginalExtension();
 
@@ -96,6 +103,10 @@ class ProductsController extends Controller
 
         $product->save();
 
+        if (request()->ajax()) {
+            return ['success' => true];
+        }
+
         return redirect()->route('create');
     }
 
@@ -103,10 +114,14 @@ class ProductsController extends Controller
      * Return the view to edit a product
      *
      * @param Product $product
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Product
      */
     public function edit(Product $product)
     {
+        if (request()->ajax()) {
+            return $product;
+        }
+
         return view('products.save', compact('product'));
     }
 
@@ -114,27 +129,47 @@ class ProductsController extends Controller
      * Persist (update) the edited product
      *
      * @param Product $product
-     * @return \Illuminate\Http\RedirectResponse
+     * @return array
      */
     public function update(Product $product)
     {
-        // save the name af the old image
-        $oldImage = $product->getImagePath();
+        if (request()->hasFile('image')) {
 
-        $validateAttributes = $this->validateProduct();
-        // make the name of the image unique
-        $imageName = uniqid() . '.' . request()->image->getClientOriginalExtension();
+            // save the name af the old image
+            $oldImage = $product->getImagePath();
 
-        // save the image in the folder
-        request()->image->move(public_path('images'), $imageName);
+            $validateAttributes = $this->validateProduct();
 
-        $validateAttributes['image'] = $imageName;
+            // make the name of the image unique
+            $imageName = uniqid() . '.' . request()->image->getClientOriginalExtension();
 
-        $product->update($validateAttributes);
+            // save the image in the folder
+            request()->image->move(public_path('images'), $imageName);
 
-        // delete the old image from sever
-        if (File::exists($oldImage)) {
-            File::delete($oldImage);
+            $validateAttributes['image'] = $imageName;
+
+            $product->update($validateAttributes);
+
+            // delete the old image from sever
+            if (File::exists($oldImage)) {
+                File::delete($oldImage);
+            }
+
+        } else {
+
+            $validateAttributes = request()->validate([
+                'title' => 'required|min:3',
+                'description' => 'required',
+                'price' => 'required|numeric'
+            ]);
+
+            $validateAttributes['image'] = $product->image;
+
+            $product->update($validateAttributes);
+        }
+
+        if (request()->ajax()) {
+            return ['success' => true];
         }
 
         return redirect()->route('products');
@@ -148,7 +183,7 @@ class ProductsController extends Controller
     public function validateProduct()
     {
         return request()->validate([
-            'title' => 'required|min:3|regex:/^[a-zA-Z ]*$/',
+            'title' => 'required|min:3',
             'description' => 'required',
             'price' => 'required|numeric',
             'image' => 'required|image'
@@ -159,7 +194,7 @@ class ProductsController extends Controller
      * Delete a product
      *
      * @param Product $product
-     * @return \Illuminate\Http\RedirectResponse
+     * @return array
      * @throws \Exception
      */
     public function delete(Product $product)
@@ -171,6 +206,10 @@ class ProductsController extends Controller
         // delete the image form server
         if(File::exists($oldImage)) {
             File::delete($oldImage);
+        }
+
+        if (request()->ajax()) {
+            return ['success' => $oldImage];
         }
 
         return redirect()->route('products');

@@ -25,7 +25,7 @@ $factory->define(Product::class, function (Faker $faker) {
         'title' => $faker->title,
         'description' => $faker->sentence,
         'price' => $faker->randomFloat(2, 0, 1000),
-        'image' => '1.jpg',
+        'image' => '1.png',
     ];
 });
 
