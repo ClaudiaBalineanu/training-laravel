@@ -13,6 +13,7 @@
             color: #FF0000;
         }
     </style>
+
     <!-- Custom JS script -->
     <script type="text/javascript">
         $(document).ready(function () {
@@ -77,19 +78,6 @@
                         '<textarea id="comment" name="comment" cols="20" rows="7" placeholder="{{ __('Comment') }}"></textarea>',
                         '<span class="comment error"></span>',
                         '<input type="submit" class="submit" name="submit" value="{{ __('Checkout') }}">',
-                    '</form>'
-                ].join('');
-            }
-
-            function getLogin() {
-                return [
-                    '<form method="POST" class="form_login" action="' + window.location.origin + '/login' + '">',
-                        '@csrf',
-                        '<input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">',
-                        '<span class="email error"></span>',
-                        '<input id="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">',
-                        '<span class="password error"></span>',
-                        '<input type="submit" class="submit" name="submit" value="{{ __('Login') }}">',
                     '</form>'
                 ].join('');
             }
@@ -352,8 +340,6 @@
                     case '#login':
                         $('.login').show();
 
-                        $('.login .login_div').html(getLogin());
-
                         $('.login .submit').on('click', function(e) {
                             e.preventDefault();
 
@@ -364,15 +350,26 @@
                                 method: 'POST',
                                 data: $('.login .form_login').serialize(),
                                 success: function (response) {
-                                    console.log(response);
-                                    //window.location.hash = '#products';
+                                    console.log(123, response);
+
+                                    if (response.errors) {
+                                        $.each(response.errors, function (key, value) {
+                                            $('.form_login .' + key +  '.error').append(value);
+                                        });
+                                    } else {
+                                        console.log(789, response);
+                                        //window.location.hash = '#products';
+                                    }
+
+
                                 },
                                 error: function (response) {
+                                    console.log(456, response);
+
                                     if (response.status === 422) {
-                                        //console.log(345, response);
                                         var errors = response.responseJSON.errors;
                                         $.each(errors, function (key, value) {
-                                            $('.' + key +  '.error').append(value);
+                                            $('.form_login .' + key +  '.error').append(value);
                                         });
                                     } // end if
                                 }
@@ -435,7 +432,16 @@
 
     <h3>{{ __('Login') }}</h3>
 
-    <div class="login_div"></div>
+    <div class="login_div">
+        <form method="POST" class="form_login" action="https://training-laravel.local.ro/login">
+            @csrf
+            <input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">
+            <span class="email error"></span>
+            <input id="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">
+            <span class="password error"></span>
+            <input type="submit" class="submit" name="submit" value="{{ __('Login') }}">
+        </form>
+    </div>
 
     <a href="#" class="button">{{ __('Go to index') }}</a>
 </div>

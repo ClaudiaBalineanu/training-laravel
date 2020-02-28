@@ -22,7 +22,7 @@ class RedirectIfAuthenticated
             if ($request->ajax()) {
                 return ['success' => false];
             }
-            return redirect(RouteServiceProvider::HOME); // it works to: route('/products')
+            return redirect(RouteServiceProvider::HOME);
         }
 
         return $next($request);

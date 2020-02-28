@@ -30,6 +30,19 @@ class LoginController extends Controller
     /**
      * @inheritDoc
      */
+    protected function authenticated(Request $request, $user)
+    {
+        if ($user = Auth::user()) {
+            if ($request->ajax()) {
+                return ['success' => true];
+            }
+        }
+
+    }
+
+    /**
+     * @inheritDoc
+     */
     protected function sendFailedLoginResponse(Request $request)
     {
         if (request()->ajax()) {
