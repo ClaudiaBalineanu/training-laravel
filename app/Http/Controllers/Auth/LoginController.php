@@ -31,21 +31,6 @@ class LoginController extends Controller
     /**
      * @inheritDoc
      */
-    /*
-    protected function authenticated(Request $request, $user)
-    {
-
-            if ($request->ajax()) {
-                return ['success' => true];
-            }
-
-
-    }
-    */
-
-    /**
-     * @inheritDoc
-     */
     protected function sendLoginResponse(Request $request)
     {
         if (request()->ajax()) {
@@ -55,6 +40,8 @@ class LoginController extends Controller
         }
 
         $this->sendLoginResponseOriginal($request);
+
+        return redirect('products');
     }
 
     /**
@@ -104,6 +91,8 @@ class LoginController extends Controller
                 'success' => true,
             ];
         }
+
+        return redirect('login');
     }
 
 }

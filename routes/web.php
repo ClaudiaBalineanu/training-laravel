@@ -63,7 +63,7 @@ Route::post('/cart', 'CartController@checkout')->name('checkout');
 Auth::routes();
 
 // show all products
-Route::get('/products', 'ProductsController@show')->name('products'); // ->middleware('auth')
+Route::get('/products', 'ProductsController@show')->name('products')->middleware('auth'); //
 
 // create and persist a product
 Route::post('/products', 'ProductsController@store')->name('store');

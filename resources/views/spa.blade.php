@@ -149,6 +149,39 @@
                 ].join('');
             }
 
+            $('.login form.form_login').on('submit', function(e) {
+                e.preventDefault();
+
+                $('.form_login .error').empty();
+
+                $.ajax('/login', {
+                    dataType: 'json',
+                    method: 'POST',
+                    data: $('.login .form_login').serialize(),
+                    success: function (response) {
+                        console.log(123, response);
+
+                        if (response.success) {
+                            window.location.hash = '#products';
+                        } else if (response.errors) {
+                            $.each(response.errors, function (key, value) {
+                                $('.form_login .' + key +  '.error').append(value);
+                            });
+                        }
+                    },
+                    error: function (response) {
+                        console.log(456, response);
+
+                        if (response.status === 422) {
+                            var errors = response.responseJSON.errors;
+                            $.each(errors, function (key, value) {
+                                $('.form_login .' + key +  '.error').append(value);
+                            });
+                        }
+                    }
+                });
+            });
+
             /**
              * URL hash change handler
              */
@@ -328,39 +361,6 @@
 
                     case '#login':
                         $('.login').show();
-
-                        $('.login form.form_login').on('submit', function(e) {
-                            e.preventDefault();
-
-                            $('.form_login .error').empty();
-
-                            $.ajax('/login', {
-                                dataType: 'json',
-                                method: 'POST',
-                                data: $('.login .form_login').serialize(),
-                                success: function (response) {
-                                    console.log(123, response);
-
-                                    if (response.success) {
-                                        window.location.hash = '#products';
-                                    } else if (response.errors) {
-                                        $.each(response.errors, function (key, value) {
-                                            $('.form_login .' + key +  '.error').append(value);
-                                        });
-                                    }
-                                },
-                                error: function (response) {
-                                    console.log(456, response);
-
-                                    if (response.status === 422) {
-                                        var errors = response.responseJSON.errors;
-                                        $.each(errors, function (key, value) {
-                                            $('.form_login .' + key +  '.error').append(value);
-                                        });
-                                    }
-                                }
-                            });
-                        });
                         break;
                     case '#logout':
                         $.ajax('/logout', {
@@ -369,17 +369,12 @@
                                 if (response.success) {
                                     window.location.hash = '#login';
                                 } else if (response.errors) {
-                                    $.each(response.errors, function (key, value) {
-                                        $('.form_login .' + key +  '.error').append(value);
-                                    });
+                                    alert('Error');
                                 }
                             },
                             error: function (response) {
                                 if (response.status === 422) {
-                                    var errors = response.responseJSON.errors;
-                                    $.each(errors, function (key, value) {
-                                        $('.form_login .' + key +  '.error').append(value);
-                                    });
+                                    alert('Error');
                                 } // end if
                             }
                         });
@@ -463,7 +458,7 @@
             <input id="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">
             <span class="password error"></span>
 
-            <input type="submit" class="submit" name="" value="{{ __('Login') }}">
+            <input type="submit" class="submit" name="submit" value="{{ __('Login') }}">
         </form>
     </div>
 
