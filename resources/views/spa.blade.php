@@ -159,8 +159,6 @@
                     method: 'POST',
                     data: $('.login .form_login').serialize(),
                     success: function (response) {
-                        console.log(123, response);
-
                         if (response.success) {
                             window.location.hash = '#products';
                         } else if (response.errors) {
@@ -255,7 +253,12 @@
                             dataType: 'json',
                             success: function (response) {
                                 $('.products .list').html(renderList(response, parts[0]));
-                            }
+                            },
+                            error: function (response) {
+                                if (response.status === 401) {
+                                    window.location.hash = '#login';
+                                }
+                            },
                         });
                         break;
                     case '#products-delete':
@@ -361,6 +364,14 @@
 
                     case '#login':
                         $('.login').show();
+
+                        $('.form_login .email').val('');
+                        $('.form_login .password').val('');
+
+
+
+                        console.log(333, $('meta[name="csrf-token"]').attr('content'));
+
                         break;
                     case '#logout':
                         $.ajax('/logout', {
@@ -452,10 +463,10 @@
     <div class="login_div">
         <form method="POST" class="form_login" action="https://training-laravel.local.ro/login">
 
-            <input id="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">
+            <input class="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">
             <span class="email error"></span>
 
-            <input id="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">
+            <input class="password" type="password" name="password" required="required" placeholder="{{ __('Password') }}">
             <span class="password error"></span>
 
             <input type="submit" class="submit" name="submit" value="{{ __('Login') }}">
