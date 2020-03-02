@@ -22,7 +22,8 @@
 
             $.ajaxSetup({
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-XSRF-TOKEN' : document.cookie
                 }
             });
 
@@ -159,6 +160,13 @@
                     method: 'POST',
                     data: $('.login .form_login').serialize(),
                     success: function (response) {
+
+                        //console.log(444, $.cookie('XSRF-TOKEN'));
+
+                        var x = document.cookie;
+                        console.log(444, x);
+
+
                         if (response.success) {
                             window.location.hash = '#products';
                         } else if (response.errors) {
@@ -368,15 +376,14 @@
                         $('.form_login .email').val('');
                         $('.form_login .password').val('');
 
-
-
                         console.log(333, $('meta[name="csrf-token"]').attr('content'));
+
 
                         break;
                     case '#logout':
                         $.ajax('/logout', {
                             method: 'POST',
-                            success: function (response) {
+                            success: function (response, request) {
                                 if (response.success) {
                                     window.location.hash = '#login';
                                 } else if (response.errors) {
