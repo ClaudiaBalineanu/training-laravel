@@ -6,6 +6,8 @@
     <!-- Load the jQuery JS library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
+    <script src="https://pagecdn.io/lib/jquery-cookie/v1.4.1/jquery.cookie.js" integrity="sha256-uEFhyfv3UgzRTnAZ+SEgvYepKKB0FW6RqZLrqfyUNug=" crossorigin="anonymous"></script>
+
     <style>
         form input, form textarea, form img, form a {
             display: block;
@@ -23,7 +25,7 @@
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                    'X-XSRF-TOKEN' : document.cookie
+                    'X-XSRF-TOKEN' : $.cookie('XSRF-TOKEN')
                 }
             });
 
@@ -161,13 +163,15 @@
                     data: $('.login .form_login').serialize(),
                     success: function (response) {
 
-                        //console.log(444, $.cookie('XSRF-TOKEN'));
-
-                        var x = document.cookie;
-                        console.log(444, x);
+                        //var v = document.cookie.split('=');
+                        //console.log(444, v[1]);
+                        console.log(444, $.cookie('XSRF-TOKEN'));
 
 
                         if (response.success) {
+                            $('.form_login .email').val('');
+                            $('.form_login .password').val('');
+
                             window.location.hash = '#products';
                         } else if (response.errors) {
                             $.each(response.errors, function (key, value) {
@@ -176,7 +180,9 @@
                         }
                     },
                     error: function (response) {
-                        console.log(456, response);
+                        //console.log(456, response);
+
+                        console.log(419, response);
 
                         if (response.status === 422) {
                             var errors = response.responseJSON.errors;
@@ -373,11 +379,7 @@
                     case '#login':
                         $('.login').show();
 
-                        $('.form_login .email').val('');
-                        $('.form_login .password').val('');
-
                         console.log(333, $('meta[name="csrf-token"]').attr('content'));
-
 
                         break;
                     case '#logout':
