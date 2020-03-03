@@ -195,8 +195,11 @@
                     dataType: 'json',
                     method: 'POST',
                     data: $('.login .form_login').serialize(),
-                    headers: {'_token': $('meta[name="csrf-token"]').attr('content')},
+                    //headers: {'_token': $('meta[name="csrf-token"]').attr('content')},
                     success: function (response) {
+
+                        console.log(response);
+
                         if (response.success) {
                             $('.form_login .email').val('');
                             $('.form_login .password').val('');
@@ -209,6 +212,7 @@
                         }
                     },
                     error: function (response) {
+
                         console.log(419, response);
 
                         if (response.status === 422) {
@@ -387,6 +391,15 @@
                     case '#login':
                         $('.login').show();
 
+                        $.ajax('/login', {
+                            success: function (response) {
+                                //console.log('');
+                            },
+                            error: function (response) {
+                                window.location.href = '#products';
+                            }
+                        });
+
                         break;
                     case '#logout':
                         $.ajax('/logout', {
@@ -484,7 +497,7 @@
     <div class="login_div">
         <form method="POST" class="form_login" action="https://training-laravel.local.ro/login">
 
-            <!-- <input type="hidden" name="_token"-->
+            <!-- <input type="hidden" name="_token"> -->
 
             <input class="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">
             <span class="email error"></span>
