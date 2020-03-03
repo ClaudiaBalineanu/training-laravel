@@ -1,12 +1,14 @@
 <html>
 <head>
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" class="tok" content="{{ csrf_token() }}">
 
     <!-- Load the jQuery JS library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-    <script src="https://pagecdn.io/lib/jquery-cookie/v1.4.1/jquery.cookie.js" integrity="sha256-uEFhyfv3UgzRTnAZ+SEgvYepKKB0FW6RqZLrqfyUNug=" crossorigin="anonymous"></script>
+    <!-- <script src="https://pagecdn.io/lib/jquery-cookie/v1.4.1/jquery.cookie.js" integrity="sha256-uEFhyfv3UgzRTnAZ+SEgvYepKKB0FW6RqZLrqfyUNug=" crossorigin="anonymous"></script> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 
     <style>
         form input, form textarea, form img, form a {
@@ -25,7 +27,7 @@
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                    'X-XSRF-TOKEN' : $.cookie('XSRF-TOKEN')
+                    'X-XSRF-TOKEN': Cookies.get('XSRF-TOKEN')
                 }
             });
 
@@ -152,22 +154,49 @@
                 ].join('');
             }
 
+            $('.cart form.checkout').on('submit', function(e) {
+                e.preventDefault();
+
+                // empty span with errors, if not each time click submit display message or error
+                $('.checkout .error').empty();
+                $('.checkout .message').empty();
+
+                $.ajax('/cart', {
+                    method: 'POST',
+                    data: $('.cart .checkout').serialize(),
+                    success: function (response) {
+                        $('.cart .list').empty();
+                        $('.checkout .message').append(response.message);
+
+
+
+                    },
+                    error: function (response) {
+                        if (response.status === 422) {
+                            var errors = response.responseJSON.errors;
+                            $.each(errors, function (key, value) {
+                                $('.checkout .' + key +  '.error').append(value);
+                            });
+                        } // end if
+                    } // end error
+                }).done( function() {
+
+                })
+                ; // end ajax - post
+            }); // end onclick
+
             $('.login form.form_login').on('submit', function(e) {
                 e.preventDefault();
 
                 $('.form_login .error').empty();
+                //$('.form_login [name=_token]').val($('meta[name="csrf-token"]').attr('content'));
 
                 $.ajax('/login', {
                     dataType: 'json',
                     method: 'POST',
                     data: $('.login .form_login').serialize(),
+                    headers: {'_token': $('meta[name="csrf-token"]').attr('content')},
                     success: function (response) {
-
-                        //var v = document.cookie.split('=');
-                        //console.log(444, v[1]);
-                        console.log(444, $.cookie('XSRF-TOKEN'));
-
-
                         if (response.success) {
                             $('.form_login .email').val('');
                             $('.form_login .password').val('');
@@ -180,8 +209,6 @@
                         }
                     },
                     error: function (response) {
-                        //console.log(456, response);
-
                         console.log(419, response);
 
                         if (response.status === 422) {
@@ -216,30 +243,11 @@
                                 // Render the products in the cart list
                                 $('.cart .list').html(renderList(response, parts[0]));
 
-                                $('.cart form.checkout').on('submit', function(e) {
-                                    e.preventDefault();
-
-                                    // empty span with errors, if not each time click submit display message or error
-                                    $('.checkout .error').empty();
-                                    $('.checkout .message').empty();
-
-                                    $.ajax('/cart', {
-                                        method: 'POST',
-                                        data: $('.cart .checkout').serialize(),
-                                        success: function (response) {
-                                            $('.cart .list').empty();
-                                            $('.checkout .message').append(response.message);
-                                        },
-                                        error: function (response) {
-                                            if (response.status === 422) {
-                                                var errors = response.responseJSON.errors;
-                                                $.each(errors, function (key, value) {
-                                                    $('.checkout .' + key +  '.error').append(value);
-                                                });
-                                            } // end if
-                                        } // end error
-                                    }); // end ajax - post
-                                }); // end onclick
+                                $('form.checkout .name').val('');
+                                $('form.checkout .email').val('');
+                                $('form.checkout .comment').val('');
+                                $('.checkout .error').empty();
+                                $('.checkout .message').empty();
                             }
                         });
                         break;
@@ -379,15 +387,19 @@
                     case '#login':
                         $('.login').show();
 
-                        console.log(333, $('meta[name="csrf-token"]').attr('content'));
-
                         break;
                     case '#logout':
                         $.ajax('/logout', {
                             method: 'POST',
-                            success: function (response, request) {
-                                if (response.success) {
-                                    window.location.hash = '#login';
+                            success: function (response) {
+                                if (response.token) {
+                                    $('meta[name="csrf-token"]').attr('content', response.token);
+                                    $.ajaxSetup({
+                                        headers: {
+                                            'X-CSRF-TOKEN': response.token
+                                        }
+                                    });
+                                    window.location.href = '#login';
                                 } else if (response.errors) {
                                     alert('Error');
                                 }
@@ -395,7 +407,7 @@
                             error: function (response) {
                                 if (response.status === 422) {
                                     alert('Error');
-                                } // end if
+                                }
                             }
                         });
                         break;
@@ -447,13 +459,13 @@
 
             <span class="message"></span>
 
-            <input type="text" name="name" placeholder="{{ __('Name') }}">
+            <input type="text" name="name" class="name" placeholder="{{ __('Name') }}">
             <span class="name error"></span>
 
-            <input type="email" name="email" placeholder="{{ __('Email') }}">
+            <input type="email" name="email" class="email" placeholder="{{ __('Email') }}">
             <span class="email error"></span>
 
-            <textarea name="comment" cols="20" rows="7" placeholder="{{ __('Comment') }}"></textarea>
+            <textarea name="comment" cols="20" rows="7" class="comment" placeholder="{{ __('Comment') }}"></textarea>
             <span class="comment error"></span>
 
             <input type="submit" class="submit" name="submit" value="{{ __('Checkout') }}">
@@ -471,6 +483,8 @@
 
     <div class="login_div">
         <form method="POST" class="form_login" action="https://training-laravel.local.ro/login">
+
+            <!-- <input type="hidden" name="_token"-->
 
             <input class="email" type="email" name="email" required="required" placeholder="{{ __('Email') }}">
             <span class="email error"></span>

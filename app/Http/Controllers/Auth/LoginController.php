@@ -86,9 +86,11 @@ class LoginController extends Controller
      */
     protected function loggedOut(Request $request)
     {
+        session()->regenerate();
+
         if (request()->ajax()) {
             return [
-                'success' => true,
+                'token' => csrf_token(),
             ];
         }
 
