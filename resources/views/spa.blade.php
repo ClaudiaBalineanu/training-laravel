@@ -1,8 +1,5 @@
 <html>
 <head>
-
-    <meta name="csrf-token" class="tok" content="{{ csrf_token() }}">
-
     <!-- Load the jQuery JS library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
@@ -26,8 +23,7 @@
 
             $.ajaxSetup({
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                    'X-XSRF-TOKEN': Cookies.get('XSRF-TOKEN')
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
             });
 
@@ -191,39 +187,71 @@
                 $('.form_login .error').empty();
                 //$('.form_login [name=_token]').val($('meta[name="csrf-token"]').attr('content'));
 
-                $.ajax('/login', {
-                    dataType: 'json',
-                    method: 'POST',
-                    data: $('.login .form_login').serialize(),
-                    //headers: {'_token': $('meta[name="csrf-token"]').attr('content')},
+                tokenRequest(function() {
+                    var email = $('form.form_login .email').val();
+                    var password = $('form.form_login .password').val();
+                    var token = $('meta[name="csrf-token"]').attr('content');
+
+                    $.ajax('/login', {
+                        dataType: 'json',
+                        method: 'POST',
+                        data: {'email': email, 'password': password, '_token': token},
+                        //headers: {'_token': $('meta[name="csrf-token"]').attr('content')},
+                        success: function (response) {
+
+                            console.log(response);
+
+                            if (response.success) {
+                                $('.form_login .email').val('');
+                                $('.form_login .password').val('');
+
+                                localStorage.setItem('logged-in', 1);
+
+                                window.location.hash = '#products';
+                            } else if (response.errors) {
+                                $.each(response.errors, function (key, value) {
+                                    $('.form_login .' + key + '.error').append(value);
+                                });
+                            }
+                        },
+                        error: function (response) {
+
+                            console.log(419, response);
+
+                            if (response.status === 422) {
+                                var errors = response.responseJSON.errors;
+                                $.each(errors, function (key, value) {
+                                    $('.form_login .' + key + '.error').append(value);
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+
+            function tokenRequest(callback) {
+                $.ajax('/token', {
                     success: function (response) {
-
-                        console.log(response);
-
-                        if (response.success) {
-                            $('.form_login .email').val('');
-                            $('.form_login .password').val('');
-
-                            window.location.hash = '#products';
-                        } else if (response.errors) {
-                            $.each(response.errors, function (key, value) {
-                                $('.form_login .' + key +  '.error').append(value);
+                        if (response.token) {
+                            $.ajaxSetup({
+                                headers: {
+                                    'X-CSRF-TOKEN': response.token
+                                }
                             });
+                            if (callback) {
+                                callback();
+                            }
+                        } else if (response.errors) {
+                            alert('Error');
                         }
                     },
                     error: function (response) {
-
-                        console.log(419, response);
-
                         if (response.status === 422) {
-                            var errors = response.responseJSON.errors;
-                            $.each(errors, function (key, value) {
-                                $('.form_login .' + key +  '.error').append(value);
-                            });
+                            alert('Error');
                         }
                     }
                 });
-            });
+            }
 
             /**
              * URL hash change handler
@@ -391,37 +419,21 @@
                     case '#login':
                         $('.login').show();
 
-                        $.ajax('/login', {
-                            success: function (response) {
-                                //console.log('');
-                            },
-                            error: function (response) {
-                                window.location.href = '#products';
-                            }
-                        });
-
                         break;
                     case '#logout':
-                        $.ajax('/logout', {
-                            method: 'POST',
-                            success: function (response) {
-                                if (response.token) {
-                                    $('meta[name="csrf-token"]').attr('content', response.token);
-                                    $.ajaxSetup({
-                                        headers: {
-                                            'X-CSRF-TOKEN': response.token
-                                        }
-                                    });
+                        tokenRequest(function() {
+                            $.ajax('/logout', {
+                                method: 'POST',
+                                success: function (response) {
                                     window.location.href = '#login';
-                                } else if (response.errors) {
-                                    alert('Error');
+                                },
+                                error: function (response) {
+                                    if (response.status === 422) {
+                                        alert('Error');
+                                    }
+                                    window.location.href = '#login';
                                 }
-                            },
-                            error: function (response) {
-                                if (response.status === 422) {
-                                    alert('Error');
-                                }
-                            }
+                            });
                         });
                         break;
 
@@ -429,6 +441,9 @@
                         // If all else fails, always default to index
                         // Show the index page
                         $('.index').show();
+
+
+
                         // Load the index products from the server
                         $.ajax('/', {
                             dataType: 'json',

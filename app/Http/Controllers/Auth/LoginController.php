@@ -71,12 +71,12 @@ class LoginController extends Controller
 
     /**
      * Create a new controller instance.
-     *
+     *dasd
      * @return void
      */
     public function __construct()
     {
-        $this->middleware('guest')->except('logout');
+        $this->middleware('guest')->except(['logout', 'token']);
     }
 
     /**
@@ -90,11 +90,19 @@ class LoginController extends Controller
 
         if (request()->ajax()) {
             return [
-                'token' => csrf_token(),
+                'success' => true,
             ];
         }
 
         return redirect('login');
+    }
+
+    public function token()
+    {
+        return [
+            'success' => true,
+            'token' => csrf_token(),
+        ];
     }
 
 }

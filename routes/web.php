@@ -51,6 +51,8 @@ Route::get('/spa', function () {
     return view('spa');
 })->name('spa');
 
+Route::get('/token', 'Auth\\LoginController@token')->name('token');
+
 // cart and remove from cart
 Route::get('/cart', 'CartController@cart')->name('cart');
 Route::get('/cart/add/{product}', 'ProductsController@addToCart')->name('cart.add');
