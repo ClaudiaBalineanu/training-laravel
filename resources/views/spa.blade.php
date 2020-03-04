@@ -107,7 +107,7 @@
                             '<td>' + order.name + '</td>',
                             '<td>' + order.email + '</td>',
                             '<td>' + order.comment + '</td>',
-                            '<td>' + order.value[0].total + '</td>',
+                            '<td>' + (order.value[0] ? order.value[0].total : 0) + '</td>',
                         '</tr>'
                     ].join('');
                 });
