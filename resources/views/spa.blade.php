@@ -21,6 +21,9 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            // keeps if the user is logged in or not
+            var logged = false;
+
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -157,28 +160,25 @@
                 $('.checkout .error').empty();
                 $('.checkout .message').empty();
 
-                $.ajax('/cart', {
-                    method: 'POST',
-                    data: $('.cart .checkout').serialize(),
-                    success: function (response) {
-                        $('.cart .list').empty();
-                        $('.checkout .message').append(response.message);
+                tokenRequest(function() {
+                    $.ajax('/cart', {
+                        method: 'POST',
+                        data: $('.cart .checkout').serialize(),
+                        success: function (response) {
+                            $('.cart .list').empty();
+                            $('.checkout .message').append(response.message);
 
-
-
-                    },
-                    error: function (response) {
-                        if (response.status === 422) {
-                            var errors = response.responseJSON.errors;
-                            $.each(errors, function (key, value) {
-                                $('.checkout .' + key +  '.error').append(value);
-                            });
-                        } // end if
-                    } // end error
-                }).done( function() {
-
-                })
-                ; // end ajax - post
+                        },
+                        error: function (response) {
+                            if (response.status === 422) {
+                                var errors = response.responseJSON.errors;
+                                $.each(errors, function (key, value) {
+                                    $('.checkout .' + key + '.error').append(value);
+                                });
+                            } // end if
+                        } // end error
+                    }); // end ajax - post
+                });
             }); // end onclick
 
             $('.login form.form_login').on('submit', function(e) {
@@ -205,7 +205,7 @@
                                 $('.form_login .email').val('');
                                 $('.form_login .password').val('');
 
-                                localStorage.setItem('logged-in', 1);
+                                logged = true;
 
                                 window.location.hash = '#products';
                             } else if (response.errors) {
@@ -226,7 +226,7 @@
                             }
                         }
                     });
-                });
+                }); // end tokenRequest
             });
 
             function tokenRequest(callback) {
@@ -246,9 +246,8 @@
                         }
                     },
                     error: function (response) {
-                        if (response.status === 422) {
-                            alert('Error');
-                        }
+                        console.log(response);
+                        alert('Error');
                     }
                 });
             }
@@ -335,27 +334,28 @@
                                     e.preventDefault();
                                     // empty span with errors, if not each time click submit display message or error
                                     $('.save_form .error').empty();
-
                                     var formData = $('.save_form').get(0);
 
-                                    $.ajax('/products/' + parts[1], {
-                                        method: 'POST',
-                                        data: new FormData(formData),
-                                        cache: false,
-                                        contentType: false,
-                                        processData: false,
-                                        success: function (response) {
-                                            location.reload();
-                                        },
-                                        error: function (response) {
-                                            if (response.status === 422) {
-                                                var errors = response.responseJSON.errors;
-                                                $.each(errors, function (key, value) {
-                                                    $('.save_form .' + key +  '.error').append(value);
-                                                });
-                                            } // end if
-                                        }, // end error
-                                    }); // end ajax - post
+                                    tokenRequest(function() {
+                                        $.ajax('/products/' + parts[1], {
+                                            method: 'POST',
+                                            data: new FormData(formData),
+                                            cache: false,
+                                            contentType: false,
+                                            processData: false,
+                                            success: function (response) {
+                                                location.reload();
+                                            },
+                                            error: function (response) {
+                                                if (response.status === 422) {
+                                                    var errors = response.responseJSON.errors;
+                                                    $.each(errors, function (key, value) {
+                                                        $('.save_form .' + key + '.error').append(value);
+                                                    });
+                                                } // end if
+                                            }, // end error
+                                        }); // end ajax - post
+                                    }); // end tokenRequest
                                 }); // onclick submit save_form
                             }
                         });
@@ -370,27 +370,28 @@
 
                             // empty span with errors, if not each time click submit display message or error
                             $('.save_form .error').empty();
-
                             var formData = $('.save_form').get(0);
 
-                            $.ajax('/products', {
-                                method: 'POST',
-                                data: new FormData(formData),
-                                cache: false,
-                                contentType: false,
-                                processData: false,
-                                success: function (response) {
-                                    location.reload();
-                                },
-                                error: function (response) {
-                                    if (response.status === 422) {
-                                        var errors = response.responseJSON.errors;
-                                        $.each(errors, function (key, value) {
-                                            $('.save_form .' + key +  '.error').append(value);
-                                        });
-                                    } // end if
-                                }, // end error
-                            }); // end ajax - post
+                            tokenRequest(function() {
+                                $.ajax('/products', {
+                                    method: 'POST',
+                                    data: new FormData(formData),
+                                    cache: false,
+                                    contentType: false,
+                                    processData: false,
+                                    success: function (response) {
+                                        location.reload();
+                                    },
+                                    error: function (response) {
+                                        if (response.status === 422) {
+                                            var errors = response.responseJSON.errors;
+                                            $.each(errors, function (key, value) {
+                                                $('.save_form .' + key + '.error').append(value);
+                                            });
+                                        } // end if
+                                    }, // end error
+                                }); // end ajax - post
+                            }); // end tokenRequest
                         }); // onclick submit save_form
                         break;
 
@@ -425,6 +426,7 @@
                             $.ajax('/logout', {
                                 method: 'POST',
                                 success: function (response) {
+                                    logged = false;
                                     window.location.href = '#login';
                                 },
                                 error: function (response) {
@@ -442,7 +444,9 @@
                         // Show the index page
                         $('.index').show();
 
-
+                        console.log(logged);
+                        // if logged in show link to logout else show link to login
+                        logged == true ? $('.index a.login').attr('href', '#logout').text('{{ __('Logout') }}') : $('.index a.login').attr('href', '#login').text('{{ __('Login') }}');
 
                         // Load the index products from the server
                         $.ajax('/', {
@@ -471,7 +475,7 @@
 
     <!-- A link to go to the cart by changing the hash -->
     <a href="#cart" class="button">{{ __('Go to cart') }}</a><br>
-    <a href="#login" class="button">{{ __('Login') }}</a><br>
+    <a href="" class="button login"></a><br>
     <a href="#products" class="button">{{ __('Products') }}</a>
 </div>
 
