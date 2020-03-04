@@ -3,8 +3,6 @@
     <!-- Load the jQuery JS library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-    <!-- <script src="https://pagecdn.io/lib/jquery-cookie/v1.4.1/jquery.cookie.js" integrity="sha256-uEFhyfv3UgzRTnAZ+SEgvYepKKB0FW6RqZLrqfyUNug=" crossorigin="anonymous"></script> -->
-
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 
     <style>
@@ -21,7 +19,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            // keeps if the user is logged in or not
+            // if the user is logged in or not
             var logged = false;
 
             $.ajaxSetup({
@@ -30,23 +28,6 @@
                 }
             });
 
-            /**
-             * A function that takes a products array and renders it's html
-             *
-             * The products array must be in the form of
-             * [{
-             *     "title": "Product 1 title",
-             *     "description": "Product 1 desc",
-             *     "price": 1
-             * },{
-             *     "title": "Product 2 title",
-             *     "description": "Product 2 desc",
-             *     "price": 2
-             * }]
-             */
-
-            //this js
-            //add here a variable for change links (remove/add/delete/edit)
             function renderList(products, hash) {
                 html = '';
 
@@ -156,7 +137,6 @@
             $('.cart form.checkout').on('submit', function(e) {
                 e.preventDefault();
 
-                // empty span with errors, if not each time click submit display message or error
                 $('.checkout .error').empty();
                 $('.checkout .message').empty();
 
@@ -167,7 +147,6 @@
                         success: function (response) {
                             $('.cart .list').empty();
                             $('.checkout .message').append(response.message);
-
                         },
                         error: function (response) {
                             if (response.status === 422) {
@@ -196,15 +175,11 @@
                         method: 'POST',
                         data: {'email': email, 'password': password, '_token': token},
                         success: function (response) {
-
-                            console.log(response);
-
-                            logged = true;
-
                             if (response.success) {
                                 $('.form_login .email').val('');
                                 $('.form_login .password').val('');
 
+                                logged = true;
                                 window.location.hash = '#products';
                             } else if (response.errors) {
                                 $.each(response.errors, function (key, value) {
@@ -213,9 +188,6 @@
                             }
                         },
                         error: function (response) {
-
-                            console.log(419, response);
-
                             if (response.status === 422) {
                                 var errors = response.responseJSON.errors;
                                 $.each(errors, function (key, value) {
@@ -244,7 +216,6 @@
                         }
                     },
                     error: function (response) {
-                        console.log(response);
                         alert('Error');
                     }
                 });
@@ -330,7 +301,7 @@
 
                                 $('.product form.save_form').on('submit', function(e) {
                                     e.preventDefault();
-                                    // empty span with errors, if not each time click submit display message or error
+
                                     $('.save_form .error').empty();
                                     var formData = $('.save_form').get(0);
 
@@ -366,7 +337,6 @@
                         $('.product form.save_form').on('submit', function(e) {
                             e.preventDefault();
 
-                            // empty span with errors, if not each time click submit display message or error
                             $('.save_form .error').empty();
                             var formData = $('.save_form').get(0);
 
@@ -425,7 +395,6 @@
                                 method: 'POST',
                                 success: function (response) {
                                     logged = false;
-
                                     window.location.href = '#login';
                                 },
                                 error: function (response) {
@@ -444,7 +413,7 @@
                         $('.index').show();
 
                         // if logged in show link to logout else show link to login
-                        logged == true ? $('.index a.login').attr('href', '#logout').text('{{ __('Logout') }}') : $('.index a.login').attr('href', '#login').text('{{ __('Login') }}');
+                        logged === true ? $('.index a.login').attr('href', '#logout').text('{{ __('Logout') }}') : $('.index a.login').attr('href', '#login').text('{{ __('Login') }}');
 
                         // Load the index products from the server
                         $.ajax('/', {
