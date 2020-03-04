@@ -185,7 +185,6 @@
                 e.preventDefault();
 
                 $('.form_login .error').empty();
-                //$('.form_login [name=_token]').val($('meta[name="csrf-token"]').attr('content'));
 
                 tokenRequest(function() {
                     var email = $('form.form_login .email').val();
@@ -196,16 +195,15 @@
                         dataType: 'json',
                         method: 'POST',
                         data: {'email': email, 'password': password, '_token': token},
-                        //headers: {'_token': $('meta[name="csrf-token"]').attr('content')},
                         success: function (response) {
 
                             console.log(response);
 
+                            logged = true;
+
                             if (response.success) {
                                 $('.form_login .email').val('');
                                 $('.form_login .password').val('');
-
-                                logged = true;
 
                                 window.location.hash = '#products';
                             } else if (response.errors) {
@@ -427,6 +425,7 @@
                                 method: 'POST',
                                 success: function (response) {
                                     logged = false;
+
                                     window.location.href = '#login';
                                 },
                                 error: function (response) {
@@ -444,7 +443,6 @@
                         // Show the index page
                         $('.index').show();
 
-                        console.log(logged);
                         // if logged in show link to logout else show link to login
                         logged == true ? $('.index a.login').attr('href', '#logout').text('{{ __('Logout') }}') : $('.index a.login').attr('href', '#login').text('{{ __('Login') }}');
 
